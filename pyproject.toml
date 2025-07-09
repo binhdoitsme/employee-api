@@ -1,0 +1,26 @@
+[project]
+name = "employee-api"
+version = "0.1.0"
+description = "Employee API Search Assignment"
+authors = [{ name = "Paul Do", email = "binhdoitsme@gmail.com" }]
+dependencies = ["fastapi>=0.116.0", "uvicorn>=0.35.0", "sqlalchemy>=2.0.41", "asyncpg>=0.30.0", "greenlet>=3.2.3"]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = { text = "MIT" }
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+_.env_file = ".env"
+start = { cmd = "python src/main.py", env = { PYTHONPATH = "./src" } }
+dev = { cmd = "uvicorn src.main:app --port 8000 --host 0.0.0.0 --reload", env = { PYTHONPATH = "./src" } }
+test = { cmd = "pytest --cov-config=tox.ini --cov=src/employee_api/services --cov-report term-missing tests", env = { PYTHONPATH = "./src" } }
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=6.2.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+]

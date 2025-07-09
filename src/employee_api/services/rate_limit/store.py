@@ -1,0 +1,6 @@
+from typing import Protocol
+
+
+class RateLimitStore(Protocol):
+    async def get_access_times(self, ip: str) -> list[float]: ...
+    async def set_access_times(self, ip: str, timestamps: list[float]) -> None: ...
