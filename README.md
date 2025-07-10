@@ -26,18 +26,24 @@ A search API to be used in Employee Search Directory for a HR company search
   - department --> db column: department_id
   - location --> db column: location_id
   - status --> db column: status
-- org_id is used as shard key, to identify that an employee belongs to a specific organization.
-- Judging from frontend, let's assume we have multi-column index of (status, location_id, department_id, company_id).
-- Assumed that we have Employee domain logic enforcement in services/employee.
-- We are focusing more on the application side so I'm using an ORM (SQLAlchemy) and not carefully tuned the queries.
+- The following are assumed for the DB side for the requirements of heavy-duty API endpoint:
+  - Assume there are multiple organizations in this DB => I chose `org_id` is used as shard key, to identify that an employee belongs to a specific organization. Use `org_id` as shard key makes it efficient to query employees within an organization, as the problem statement required.
+  - Frontend allows filtering in order of [Status, Location, Department, Company] from top to bottom => I assume that we have multi-column index of (status, location_id, department_id, company_id) as well as single-column indexes on `status`, `location_id`, `department_id`, `company_id`, which allow us to effectively apply filters on these 4 attributes. We can further fine-tune the index by analyzing the frequency of usage of each condition combination to find out whether we need additional multi-column indexes.
+- Assumed that we have Employee domain logic enforcement in services/employee (validation, etc.).
+- Assumed that app is deployed as a microservice behind an API gateway that is not reachable publicly. The API gateway is assumed to be responsible for authentication & authorization, allowing only people that can access an organization to access the respective organization.
+  => Currently, the rate limiting logic is using request count per IP for limiting, so the API gateway must forward client.host to internal services.
 
 ## Key decisions
 
-- As searching function has a lot of conditions, and placing them on URL can exceed URL length -- I decided to use POST instead of GET, sacrificed cachability for flexibility
+- As searching function has a lot of conditions, and placing them on URL can exceed URL length -- I decided to use POST instead of GET, sacrificed cachability for flexibility.
 - Chose layered architecture centering around `services` layer to allow good testability, quick swap of infrastructural components (DB from SQL -> NoSQL, or rate limit store from in-memory to Redis). This also allow me to take advantage of Dependency Injection.
-- Enforced pagination so as to keep responses light.
+- Enforced pagination (max 50 items per page) and selective columns from query layer so as to keep responses light.
 - Used `pdm` as package manager to simplify package version management.
 - Used Docker & Docker compose in development to simulate the situation as close to real scenario as possible.
+- Endpoint is stateless, which makes it ready for horizontal scaling (a.k.a increase number of instances in peak hours). In the future, a load balancer can be added in addition to horizontal scaling to group requests to several organizations to selected backend instances to reduce latency when trying to request at peak times.
+- Data leakage prevention: 
+  - We only allow configured output columns (assumed to get from DB) to be returned in API response, which means we don't return ID or anything like that.
+  - Org ID is required in every filter to make sure user can only get data from a specified Org ID. We can have a DB table to configure user access and perform rejection if user chooses an Org he does not have access.
 
 ## Running the API
 

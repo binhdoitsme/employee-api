@@ -116,23 +116,12 @@ class EmployeeRepositoryOnSqla(EmployeeRepository):
                     phone_number=data.get("phone_number"),
                 )
 
-            if data.get("department_id") and data.get("department_name"):
-                emp_kwargs["department"] = Department(
-                    id=data["department_id"],
-                    name=data["department_name"],
-                )
-
-            if data.get("location_id") and data.get("location_name"):
-                emp_kwargs["location"] = Location(
-                    id=data["location_id"],
-                    name=data["location_name"],
-                )
-
-            if data.get("position_id") and data.get("position_name"):
-                emp_kwargs["position"] = Position(
-                    id=data["position_id"],
-                    name=data["position_name"],
-                )
+            if data.get("department_name"):
+                emp_kwargs["department"] = data["department_name"]
+            if data.get("location_name"):
+                emp_kwargs["location"] = data["location_name"]
+            if data.get("position_name"):
+                emp_kwargs["position"] = data["position_name"]
 
             emp_id = emp_kwargs["id"]
             if emp_id and emp_id in seen_ids:

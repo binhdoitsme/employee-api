@@ -22,17 +22,15 @@ class SearchEmployeeCriteria(BaseModel):
 
 
 class EmployeeOut(BaseModel):
-    id: UUID = Field(..., description="Employee unique identifier (UUID)")
+    # id: UUID = Field(..., description="Employee unique identifier (UUID)")
     first_name: str | None = Field(None, description="First name of the employee")
     last_name: str | None = Field(None, description="Last name of the employee")
     contact_info: ContactInfo | None = Field(
         None, description="Contact information (email, phone)"
     )
-    department: Department | None = Field(
-        None, description="Department object (id, name)"
-    )
-    location: Location | None = Field(None, description="Location object (id, name)")
-    position: Position | None = Field(None, description="Position object (id, name)")
+    department: str | None = Field(None, description="Department Name if any")
+    location: str | None = Field(None, description="Location name if any")
+    position: str | None = Field(None, description="Position name if any")
     status: EmployeeStatus | None = Field(
         None, description="Employment status (ACTIVE, NOT_STARTED, TERMINATED)"
     )
